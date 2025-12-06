@@ -1,0 +1,7 @@
+services:
+    books-service: 
+        image: khawlarouiss/books-service:latest
+        container_name: books-service
+        ports:
+            - "8081:8081"
+        restart: always
