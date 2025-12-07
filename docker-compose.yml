@@ -1,6 +1,6 @@
 services:
     books-service: 
-        image: khawlarouiss/books-service:latest
+        image: khawlarouiss/docker-microservices:books
         container_name: books-service
         ports:
             - "8081:8081"
