@@ -1,6 +1,6 @@
 services:
     books-service: 
-        image: khawlarouiss/docker-microservices:books
+        image: "${DOCKER_USERNAME}/books:latest"
         container_name: books-service
         ports:
             - "8081:8081"
