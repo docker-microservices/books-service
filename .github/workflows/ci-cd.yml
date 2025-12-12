@@ -21,9 +21,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-maven-${{ github.repository }}-${{ github.ref_name }}
           restore-keys: |
-            ${{ runner.os }}-maven-
+            ${{ runner.os }}-maven-${{ github.repository }}-
 
       - name: Maven Package
         run: mvn clean package --no-transfer-progress
@@ -51,33 +51,32 @@ jobs:
       - name: Prepare directory
         uses: appleboy/ssh-action@v0.1.9
         with:
-          host: ${{ secrets.PROD_SERVER_HOST }}
-          username: ${{ secrets.PROD_SERVER_USER }}
-          key: ${{ secrets.PROD_SERVER_SSH_KEY }}
-          port: ${{ secrets.PROD_SERVER_PORT }}
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.PROD_PORT }}
           script: |
             mkdir -p ~/docker-microservices/books
-            echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" > ~/docker-microservices/books/.env
   
       - name: Copy docker-compose to VM
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.PROD_SERVER_HOST }}
-          username: ${{ secrets.PROD_SERVER_USER }}
-          key: ${{ secrets.PROD_SERVER_SSH_KEY }}
-          port: ${{ secrets.PROD_SERVER_PORT }}
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.PROD_PORT }}
           source: "docker-compose.yml"
           target: "~/docker-microservices/books/"
   
       - name: Deploy to VM via SSH
         uses: appleboy/ssh-action@v0.1.9
         with:
-          host: ${{ secrets.PROD_SERVER_HOST }}
-          username: ${{ secrets.PROD_SERVER_USER }}
-          key: ${{ secrets.PROD_SERVER_SSH_KEY }}
-          port: ${{ secrets.PROD_SERVER_PORT }}
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.PROD_PORT }}
           script: | 
             cd ~/docker-microservices/books
-            docker-compose pull
-            docker-compose down
-            docker-compose up -d
+            sed -i "s|\${DOCKER_USERNAME}|${{ secrets.DOCKER_USERNAME }}|g" docker-compose.yml
+            docker pull ${{ secrets.DOCKER_USERNAME }}/books:latest
+            docker stack deploy --with-registry-auth -c docker-compose.yml books
