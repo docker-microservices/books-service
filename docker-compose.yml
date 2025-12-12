@@ -1,6 +1,6 @@
 services:
     books: 
-        image: "${DOCKER_USERNAME}/books:latest"
+        image: "${DOCKER_USERNAME}/books:${GITHUB_SHA}"
         ports:
             - "8081:8081"
         networks:
