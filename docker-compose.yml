@@ -1,12 +1,12 @@
 services:
-    books: 
+    books-service: 
         image: "${DOCKER_USERNAME}/books:${GITHUB_SHA}"
         ports:
             - "8081:8081"
         networks:
           docker-ms:
             aliases:
-              - books
+              - books-service
         deploy:
           replicas: 1
           restart_policy:
